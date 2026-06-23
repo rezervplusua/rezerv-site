@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Резерв+ Fake — завантажити додаток</title>
+<meta name="description" content="Додаток «Резерв+ Fake»: електронний військовий документ у телефоні. Завантажити APK для Android, безкоштовний тест на 1 годину, активація.">
+<style>
+  :root{
+    --bg:#1c1b17; --bg2:#24221d; --card:#f6f4ea; --beige:#e0dfcc;
+    --ink:#1c1b17; --muted:#6e6b5c; --line:#e2dfcd;
+    --accent:#fc8809; --accent2:#ffb056; --ok:#2e9e5b;
+    --trial:#2e9e5b; --trial-bg:#e3f3e9;
+    --shadow:0 12px 40px rgba(0,0,0,.18);
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);background:var(--beige);line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+  .btn{display:inline-flex;align-items:center;gap:9px;justify-content:center;border:none;cursor:pointer;
+    font-size:17px;font-weight:700;padding:16px 26px;border-radius:999px;text-decoration:none;transition:.15s;white-space:nowrap}
+  .btn-primary{background:var(--accent);color:#1c1b17;box-shadow:0 8px 22px rgba(252,136,9,.35)}
+  .btn-primary:hover{background:var(--accent2);transform:translateY(-1px)}
+  .btn-ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.4)}
+  .btn-ghost:hover{border-color:#fff;background:rgba(255,255,255,.08)}
+  .btn-dark{background:#1c1b17;color:#fff}
+  .btn-dark:hover{background:#2e2c25;transform:translateY(-1px)}
+  .btn-trial{background:var(--trial);color:#fff;box-shadow:0 8px 22px rgba(46,158,91,.35)}
+  .btn-trial:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .btn-block{display:flex;width:100%}
+
+  /* header */
+  header{position:sticky;top:0;z-index:20;background:rgba(28,27,23,.92);backdrop-filter:blur(8px);
+    border-bottom:1px solid rgba(255,255,255,.08)}
+  .hrow{display:flex;align-items:center;justify-content:space-between;height:62px}
+  .logo{font-size:22px;font-weight:800;letter-spacing:.3px;color:#fff;text-decoration:none}
+  .logo .plus{color:var(--accent)}
+  .langtoggle{display:flex;gap:4px;background:rgba(255,255,255,.08);border-radius:999px;padding:4px}
+  .langbtn{border:none;background:transparent;color:#cfcabf;font-weight:700;font-size:13px;
+    padding:6px 12px;border-radius:999px;cursor:pointer}
+  .langbtn.active{background:var(--accent);color:#1c1b17}
+
+  /* hero */
+  .hero{background:radial-gradient(1200px 500px at 80% -10%,rgba(252,136,9,.18),transparent 60%),var(--bg);
+    color:#f3f1e6;padding:54px 0 70px}
+  .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:38px;align-items:center}
+  .badge{display:inline-block;background:rgba(46,158,91,.18);color:#79d6a0;
+    font-weight:700;font-size:13px;padding:6px 13px;border-radius:999px;margin-bottom:18px}
+  h1{font-size:43px;line-height:1.1;margin:0 0 16px;font-weight:800;letter-spacing:-.5px}
+  .lead{font-size:19px;color:#cfcabf;margin:0 0 26px;max-width:38ch}
+  .cta{display:flex;flex-wrap:wrap;gap:13px;margin-bottom:18px}
+  .hint{font-size:13.5px;color:#9c9686}
+  .pricepill{display:inline-flex;align-items:center;gap:8px;margin-top:6px;background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);padding:9px 15px;border-radius:999px;font-weight:700;font-size:15px;color:#f3f1e6}
+
+  /* phone with real screenshot */
+  .phone{justify-self:center;width:300px;background:#0f0e0c;border-radius:42px;
+    padding:10px;box-shadow:var(--shadow);border:1px solid #34322b}
+  .phone img{width:100%;display:block;border-radius:32px}
+
+  /* sections */
+  section{padding:60px 0}
+  .sec-light{background:#fff}
+  .sec-beige{background:var(--beige)}
+  .sec-dark{background:var(--bg);color:#f3f1e6}
+  .sec-dark h2,.sec-dark .sub{color:#f3f1e6}
+  .sec-dark .sub{color:#cfcabf}
+  h2{font-size:30px;font-weight:800;margin:0 0 8px;text-align:center;letter-spacing:-.3px}
+  .sub{text-align:center;color:var(--muted);font-size:17px;margin:0 auto 38px;max-width:56ch}
+
+  /* trial vs full plans */
+  .plans{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:820px;margin:0 auto}
+  .plan{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px;display:flex;flex-direction:column}
+  .plan.dark{background:#1c1b17;color:#f3f1e6;border-color:#34322b}
+  .plan .tag{display:inline-block;font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:999px;margin-bottom:14px}
+  .plan.trial .tag{background:var(--trial-bg);color:var(--trial)}
+  .plan.full .tag{background:rgba(252,136,9,.18);color:var(--accent2)}
+  .plan h3{margin:0 0 6px;font-size:22px}
+  .plan .price-big{font-size:34px;font-weight:800;margin:6px 0 4px}
+  .plan.trial .price-big{color:var(--trial)}
+  .plan.full .price-big{color:var(--accent2)}
+  .plan p{margin:0 0 16px;color:var(--muted);font-size:15px}
+  .plan.dark p{color:#cfcabf}
+  .plan ul{margin:0 0 18px;padding:0 0 0 18px;font-size:14.5px;color:var(--muted)}
+  .plan.dark ul{color:#cfcabf}
+  .plan ul li{margin:5px 0}
+  .plan .spacer{flex:1}
+
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .feat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+  .feat .ico{font-size:30px}
+  .feat h3{margin:12px 0 6px;font-size:18px}
+  .feat p{margin:0;color:var(--muted);font-size:15px}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:s}
+  .step{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px 22px 22px;position:relative}
+  .sec-light .step{background:var(--card)}
+  .step .n{position:absolute;top:-16px;left:22px;width:34px;height:34px;border-radius:50%;
+    background:var(--accent);color:#1c1b17;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .step h3{margin:10px 0 6px;font-size:18px}
+  .step p{margin:0;color:var(--muted);font-size:15px}
+
+  /* gallery — real screenshots */
+  .gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;max-width:980px;margin:0 auto}
+  .shot{background:#0f0e0c;border-radius:24px;padding:6px;box-shadow:var(--shadow)}
+  .shot img{width:100%;display:block;border-radius:20px}
+  .shot-cap{text-align:center;margin-top:8px;color:var(--muted);font-size:13px}
+
+  /* play-protect instructions */
+  .protect{display:grid;grid-template-columns:1fr 1fr;gap:26px;max-width:880px;margin:0 auto}
+  .protect-step{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px;text-align:center}
+  .protect-step img{width:100%;max-width:340px;display:block;margin:0 auto 14px;border-radius:14px}
+  .protect-step .step-n{display:inline-block;background:var(--accent);color:#1c1b17;font-weight:800;
+    border-radius:999px;padding:4px 14px;font-size:14px;margin-bottom:10px}
+  .protect-step h3{margin:6px 0 6px;font-size:18px}
+  .protect-step p{margin:0;color:var(--muted);font-size:14.5px}
+
+  .buybox{max-width:640px;margin:0 auto;background:#1c1b17;color:#f3f1e6;border-radius:24px;
+    padding:30px;text-align:center;box-shadow:var(--shadow)}
+  .buybox .big{font-size:34px;font-weight:800;color:var(--accent2);margin:6px 0 4px}
+  .buybox p{color:#cfcabf;margin:0 0 18px}
+
+  .faq{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+  details{background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px 18px}
+  .sec-light details{background:var(--card)}
+  summary{cursor:pointer;font-weight:700;padding:14px 0;list-style:none;font-size:17px}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";float:right;color:var(--accent);font-weight:800}
+  details[open] summary::after{content:"–"}
+  details p{margin:0 0 14px;color:var(--muted)}
+
+  footer{background:var(--bg);color:#9c9686;text-align:center;padding:34px 0;font-size:14px}
+  footer a{color:#cfcabf;text-decoration:none}
+
+  .center{text-align:center}
+  .mt{margin-top:26px}
+
+  @media(max-width:860px){
+    .hero-grid{grid-template-columns:1fr;text-align:center}
+    .lead{margin-left:auto;margin-right:auto}
+    .cta{justify-content:center}
+    h1{font-size:34px}
+    .grid{grid-template-columns:repeat(2,1fr)}
+    .steps{grid-template-columns:1fr}
+    .plans{grid-template-columns:1fr}
+    .protect{grid-template-columns:1fr}
+    .gallery{grid-template-columns:repeat(2,1fr)}
+    .phone{order:-1;margin-bottom:8px}
+  }
+  @media(max-width:480px){ .grid{grid-template-columns:1fr} h1{font-size:29px} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hrow">
+    <a href="#" class="logo">Резерв<span class="plus">+</span></a>
+    <div class="langtoggle">
+      <button class="langbtn" data-lang="ua">УКР</button>
+      <button class="langbtn" data-lang="ru">РУС</button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="badge" data-ua="🎁 Безкоштовний тест 1 година" data-ru="🎁 Бесплатный тест 1 час"></span>
+      <h1 data-ua="Ваш військовий е-документ — у телефоні" data-ru="Ваш военный е-документ — в телефоне"></h1>
+      <p class="lead" data-ua="Додаток «Резерв+ Fake» із вашими власними даними та фото. Спробуйте безкоштовно 1 годину — і тільки потім вирішуйте, чи купувати повну версію." data-ru="Приложение «Резерв+ Fake» с вашими собственными данными и фото. Попробуйте бесплатно 1 час — и только потом решайте, покупать ли полную версию."></p>
+      <div class="cta">
+        <a class="btn btn-primary apkBtn" href="#" data-apk download data-ua="⬇ Завантажити APK" data-ru="⬇ Скачать APK"></a>
+        <a class="btn btn-trial botBtn" href="https://t.me/rezervplu_bot" target="_blank" rel="noopener" data-ua="🎁 Тест на 1 годину" data-ru="🎁 Тест на 1 час"></a>
+      </div>
+      <div class="pricepill"><span>💎</span><span class="price" data-ua="Повна версія — 26 USDT (мережа TRON)" data-ru="Полная версия — 26 USDT (сеть TRON)"></span></div>
+      <p class="hint mt" data-ua="Для Android. iPhone не підтримується." data-ru="Для Android. iPhone не поддерживается."></p>
+    </div>
+
+    <div class="phone" aria-hidden="true">
+      <img src="./screens/04-card-clean.png" alt="Резерв+ screenshot">
+    </div>
+  </div>
+</div>
+
+<!-- PLANS — trial vs full -->
+<section class="sec-light">
+  <div class="wrap">
+    <h2 data-ua="Два варіанти" data-ru="Два варианта"></h2>
+    <p class="sub" data-ua="Спочатку спробуйте безкоштовно — потім купіть, якщо сподобається." data-ru="Сначала попробуйте бесплатно — потом купите, если понравится."></p>
+    <div class="plans">
+      <div class="plan trial">
+        <span class="tag" data-ua="🎁 БЕЗКОШТОВНО" data-ru="🎁 БЕСПЛАТНО"></span>
+        <h3 data-ua="Тест на 1 годину" data-ru="Тест на 1 час"></h3>
+        <div class="price-big" data-ua="0 USDT" data-ru="0 USDT"></div>
+        <p data-ua="Один тест на акаунт. Працює як повна версія — рівно 60 хвилин." data-ru="Один тест на аккаунт. Работает как полная версия — ровно 60 минут."></p>
+        <ul>
+          <li data-ua="Усі функції додатка" data-ru="Все функции приложения"></li>
+          <li data-ua="Повний документ, PDF, QR" data-ua-old="" data-ru="Полный документ, PDF, QR"></li>
+          <li data-ua="Без жодних обмежень 60 хв" data-ru="Без каких-либо ограничений 60 мин"></li>
+          <li data-ua="Один тест на Telegram-акаунт" data-ru="Один тест на Telegram-аккаунт"></li>
+        </ul>
+        <div class="spacer"></div>
+        <a class="btn btn-trial btn-block botBtn" href="https://t.me/rezervplu_bot" target="_blank" rel="noopener" data-ua="🎁 Отримати тест у Telegram" data-ru="🎁 Получить тест в Telegram"></a>
+      </div>
+      <div class="plan full dark">
+        <span class="tag" data-ua="💎 ПОВНА ВЕРСІЯ" data-ru="💎 ПОЛНАЯ ВЕРСИЯ"></span>
+        <h3 data-ua="Без обмежень назавжди" data-ru="Без ограничений навсегда"></h3>
+        <div class="price-big">26 USDT</div>
+        <p data-ua="Один код — один телефон. Один раз купив — користуєтесь скільки треба." data-ru="Один код — один телефон. Один раз купили — пользуетесь сколько нужно."></p>
+        <ul>
+          <li data-ua="Без обмежень за часом" data-ru="Без ограничений по времени"></li>
+          <li data-ua="Оплата криптовалютою USDT" data-ru="Оплата криптовалютой USDT"></li>
+          <li data-ua="Мережа TRON (TRC-20)" data-ru="Сеть TRON (TRC-20)"></li>
+          <li data-ua="Код приходить автоматично" data-ru="Код приходит автоматически"></li>
+        </ul>
+        <div class="spacer"></div>
+        <a class="btn btn-primary btn-block botBtn" href="https://t.me/rezervplu_bot" target="_blank" rel="noopener" data-ua="🛒 Купити код у Telegram" data-ru="🛒 Купить код в Telegram"></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="sec-beige">
+  <div class="wrap">
+    <h2 data-ua="Як виглядає додаток" data-ru="Как выглядит приложение"></h2>
+    <p class="sub" data-ua="Реальні скріншоти з телефону." data-ru="Реальные скриншоты с телефона."></p>
+    <div class="gallery">
+      <div>
+        <div class="shot"><img src="./screens/04-card-clean.png" alt="Резерв ID"></div>
+        <div class="shot-cap" data-ua="Резерв ID" data-ru="Резерв ID"></div>
+      </div>
+      <div>
+        <div class="shot"><img src="./screens/03-qr.png" alt="QR-код"></div>
+        <div class="shot-cap" data-ua="QR-код" data-ru="QR-код"></div>
+      </div>
+      <div>
+        <div class="shot"><img src="./screens/06-document.png" alt="Документ"></div>
+        <div class="shot-cap" data-ua="Повний документ" data-ru="Полный документ"></div>
+      </div>
+      <div>
+        <div class="shot"><img src="./screens/05-pdf.png" alt="PDF"></div>
+        <div class="shot-cap" data-ua="PDF документ" data-ru="PDF документ"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="sec-light">
+  <div class="wrap">
+    <h2 data-ua="Що всередині" data-ru="Что внутри"></h2>
+    <p class="sub" data-ua="Повноцінний електронний документ із вашими даними." data-ru="Полноценный электронный документ с вашими данными."></p>
+    <div class="grid">
+      <div class="feat"><div class="ico">📄</div><h3 data-ua="Документ" data-ru="Документ"></h3><p data-ua="Військово-обліковий документ із вашими даними та фото." data-ru="Военно-учётный документ с вашими данными и фото."></p></div>
+      <div class="feat"><div class="ico">📲</div><h3 data-ua="QR та PDF" data-ru="QR и PDF"></h3><p data-ua="Показуйте QR-код, зберігайте та діліться PDF." data-ru="Показывайте QR-код, сохраняйте и делитесь PDF."></p></div>
+      <div class="feat"><div class="ico">🔒</div><h3 data-ua="Офлайн" data-ru="Офлайн"></h3><p data-ua="Усі дані лише на вашому пристрої." data-ru="Все данные только на вашем устройстве."></p></div>
+      <div class="feat"><div class="ico">🛡️</div><h3 data-ua="Захист входу" data-ru="Защита входа"></h3><p data-ua="Вхід за PIN-кодом або Face ID." data-ru="Вход по PIN-коду или Face ID."></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALL -->
+<section class="sec-beige">
+  <div class="wrap">
+    <h2 data-ua="Як встановити" data-ru="Как установить"></h2>
+    <p class="sub" data-ua="3 простих кроки на телефоні Android." data-ru="3 простых шага на телефоне Android."></p>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h3 data-ua="Завантажте файл" data-ru="Скачайте файл"></h3><p data-ua="Натисніть «Завантажити APK» — файл збережеться у телефон." data-ru="Нажмите «Скачать APK» — файл сохранится в телефон."></p></div>
+      <div class="step"><div class="n">2</div><h3 data-ua="Дозвольте встановлення" data-ru="Разрешите установку"></h3><p data-ua="Відкрийте файл. Якщо телефон запитає — дозвольте встановлення з цього джерела." data-ru="Откройте файл. Если телефон спросит — разрешите установку из этого источника."></p></div>
+      <div class="step"><div class="n">3</div><h3 data-ua="Встановіть" data-ru="Установите"></h3><p data-ua="Натисніть «Встановити». Іконка зʼявиться на екрані." data-ru="Нажмите «Установить». Иконка появится на экране."></p></div>
+    </div>
+    <div class="center mt"><a class="btn btn-dark apkBtn" href="#" data-apk download data-ua="⬇ Завантажити APK" data-ru="⬇ Скачать APK"></a></div>
+  </div>
+</section>
+
+<!-- PLAY PROTECT WARNING -->
+<section class="sec-dark">
+  <div class="wrap">
+    <h2 data-ua="⚠ Якщо Google Play Захист блокує встановлення" data-ru="⚠ Если Google Play Защита блокирует установку"></h2>
+    <p class="sub" data-ua="Це нормально — додаток не з магазину, тому Android перестраховується. Виконайте 2 кроки:" data-ru="Это нормально — приложение не из магазина, поэтому Android перестраховывается. Выполните 2 шага:"></p>
+    <div class="protect">
+      <div class="protect-step">
+        <img src="./screens/play-step1.svg" alt="Шаг 1">
+        <span class="step-n" data-ua="Крок 1" data-ru="Шаг 1"></span>
+        <h3 data-ua="Натисніть «Подробнее»" data-ru="Нажмите «Подробнее»"></h3>
+        <p data-ua="Внизу вікна «Приложение заблокировано» натисніть посилання «Подробнее» — вікно розгорнеться." data-ru="Внизу окна «Приложение заблокировано» нажмите ссылку «Подробнее» — окно развернётся."></p>
+      </div>
+      <div class="protect-step">
+        <img src="./screens/play-step2.svg" alt="Шаг 2">
+        <span class="step-n" data-ua="Крок 2" data-ru="Шаг 2"></span>
+        <h3 data-ua="Натисніть «Все равно установить»" data-ru="Нажмите «Все равно установить»"></h3>
+        <p data-ua="Тепер видно посилання «Все равно установить» — натисніть його. Додаток встановиться." data-ru="Теперь видна ссылка «Все равно установить» — нажмите её. Приложение установится."></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW TO USE -->
+<section class="sec-light">
+  <div class="wrap">
+    <h2 data-ua="Як користуватися" data-ru="Как пользоваться"></h2>
+    <p class="sub" data-ua="Внесіть свої дані за хвилину." data-ru="Внесите свои данные за минуту."></p>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h3 data-ua="Відкрийте додаток" data-ru="Откройте приложение"></h3><p data-ua="Запустіть «Резерв+ Fake» на телефоні. Задайте PIN-код для входу." data-ru="Запустите «Резерв+ Fake» на телефоне. Задайте PIN-код для входа."></p></div>
+      <div class="step"><div class="n">2</div><h3 data-ua="Секретний режим" data-ru="Секретный режим"></h3><p data-ua="Тричі швидко торкніться фотографії — відкриється редагування всіх даних і фото." data-ru="Трижды быстро коснитесь фотографии — откроется редактирование всех данных и фото."></p></div>
+      <div class="step"><div class="n">3</div><h3 data-ua="Активуйте" data-ru="Активируйте"></h3><p data-ua="Введіть код активації — і все працює без обмежень." data-ru="Введите код активации — и всё работает без ограничений."></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- BUY -->
+<section class="sec-beige">
+  <div class="wrap">
+    <h2 data-ua="Як купити повну версію" data-ru="Как купить полную версию"></h2>
+    <p class="sub" data-ua="Оплата криптовалютою USDT через Telegram-бота. Код приходить автоматично." data-ru="Оплата криптовалютой USDT через Telegram-бота. Код приходит автоматически."></p>
+    <div class="steps" style="margin-bottom:30px">
+      <div class="step"><div class="n">1</div><h3 data-ua="Відкрийте бота" data-ru="Откройте бота"></h3><p data-ua="Натисніть кнопку нижче — відкриється @rezervplu_bot. Натисніть «🛒 Купити код»." data-ru="Нажмите кнопку ниже — откроется @rezervplu_bot. Нажмите «🛒 Купити код»."></p></div>
+      <div class="step"><div class="n">2</div><h3 data-ua="Оплатіть" data-ru="Оплатите"></h3><p data-ua="Бот видасть адресу. Надішліть 26 USDT у мережі TRON (TRC-20)." data-ru="Бот выдаст адрес. Отправьте 26 USDT в сети TRON (TRC-20)."></p></div>
+      <div class="step"><div class="n">3</div><h3 data-ua="Отримайте код" data-ru="Получите код"></h3><p data-ua="Код активації прийде в чат сам. Введіть його у додатку." data-ru="Код активации придёт в чат сам. Введите его в приложении."></p></div>
+    </div>
+    <div class="buybox">
+      <div data-ua="Ціна повної версії" data-ru="Цена полной версии"></div>
+      <div class="big">26 USDT</div>
+      <p data-ua="Один код — один телефон. Оплата в мережі TRON (TRC-20)." data-ru="Один код — один телефон. Оплата в сети TRON (TRC-20)."></p>
+      <a class="btn btn-primary btn-block botBtn" href="https://t.me/rezervplu_bot" target="_blank" rel="noopener" data-ua="🛒 Купити код у Telegram" data-ru="🛒 Купить код в Telegram"></a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sec-light">
+  <div class="wrap">
+    <h2 data-ua="Питання та відповіді" data-ru="Вопросы и ответы"></h2>
+    <div class="faq mt">
+      <details><summary data-ua="Як працює безкоштовний тест?" data-ru="Как работает бесплатный тест?"></summary><p data-ua="Натисніть «🎁 Тест на 1 годину» у Telegram-боті — отримаєте код. Введіть його у додатку. Працюватиме повністю як платна версія рівно 60 хвилин. Один тест на акаунт і на один телефон." data-ru="Нажмите «🎁 Тест на 1 час» в Telegram-боте — получите код. Введите его в приложении. Будет работать полностью как платная версия ровно 60 минут. Один тест на аккаунт и на один телефон."></p></details>
+      <details><summary data-ua="Скільки коштує повна версія?" data-ru="Сколько стоит полная версия?"></summary><p data-ua="26 USDT у мережі TRON (TRC-20). Оплата через Telegram-бота." data-ru="26 USDT в сети TRON (TRC-20). Оплата через Telegram-бота."></p></details>
+      <details><summary data-ua="На скільки пристроїв діє код?" data-ru="На сколько устройств действует код?"></summary><p data-ua="Один код активує один телефон." data-ru="Один код активирует один телефон."></p></details>
+      <details><summary data-ua="Де зберігаються мої дані?" data-ru="Где хранятся мои данные?"></summary><p data-ua="Лише на вашому пристрої. Додаток працює офлайн." data-ru="Только на вашем устройстве. Приложение работает офлайн."></p></details>
+      <details><summary data-ua="Чому Google Play Захист блокує встановлення?" data-ru="Почему Google Play Защита блокирует установку?"></summary><p data-ua="Це звичайно для додатків поза Google Play. Дивіться розділ «Якщо Google Play Захист блокує встановлення» вище — 2 кроки." data-ru="Это обычно для приложений вне Google Play. Смотрите раздел «Если Google Play Защита блокирует установку» выше — 2 шага."></p></details>
+      <details><summary data-ua="Чи можна перевстановити додаток із тим самим кодом?" data-ru="Можно ли переустановить приложение с тем же кодом?"></summary><p data-ua="Так, на тому самому телефоні — код приймається повторно. Для повної версії — без обмежень за часом. Для тесту — у межах годинного періоду." data-ru="Да, на том же телефоне — код принимается повторно. Для полной версии — без ограничений по времени. Для теста — в рамках часового периода."></p></details>
+      <details><summary data-ua="Чи працює на iPhone?" data-ru="Работает ли на iPhone?"></summary><p data-ua="Ні, лише на Android." data-ru="Нет, только на Android."></p></details>
+    </div>
+    <div class="center mt"><a class="btn btn-primary apkBtn" href="#" data-apk download data-ua="⬇ Завантажити APK" data-ru="⬇ Скачать APK"></a></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="logo" style="margin-bottom:8px">Резерв<span class="plus">+</span></div>
+    <p><span data-ua="Підтримка та купівля:" data-ru="Поддержка и покупка:"></span> <a href="https://t.me/rezervplu_bot" target="_blank" rel="noopener">@rezervplu_bot</a></p>
+  </div>
+</footer>
+
+<script>
+  // ───────────────────────────────────────────────────────────────────────────
+  //  ССЫЛКА НА APK — единственное место для смены.
+  //  Сейчас стоит прямая ссылка на свежую сборку EAS (HTTPS, без лимитов).
+  //  При обновлении приложения — замените URL ниже на новую ссылку,
+  //  которую даёт `eas build` (или скопируйте с expo.dev/artifacts/...).
+  // ───────────────────────────────────────────────────────────────────────────
+  var APK_URL = "https://expo.dev/artifacts/eas/5E7xpLtYqApJQG1-78iYl4xS7BqU7mkbI3E9_aa2KhY.apk";
+
+  (function(){
+    document.querySelectorAll("[data-apk]").forEach(function(a){ a.href = APK_URL; });
+    function apply(l){
+      document.documentElement.lang = (l==='ua') ? 'uk' : 'ru';
+      try{ localStorage.setItem('rezerv_lang', l); }catch(e){}
+      document.querySelectorAll('[data-'+l+']').forEach(function(el){
+        el.textContent = el.getAttribute('data-'+l);
+      });
+      document.querySelectorAll('.langbtn').forEach(function(b){
+        b.classList.toggle('active', b.dataset.lang===l);
+      });
+    }
+    document.querySelectorAll('.langbtn').forEach(function(b){
+      b.addEventListener('click', function(){ apply(b.dataset.lang); });
+    });
+    var saved='ua';
+    try{ saved = localStorage.getItem('rezerv_lang') || 'ua'; }catch(e){}
+    apply(saved);
+  })();
+</script>
+</body>
+</html>

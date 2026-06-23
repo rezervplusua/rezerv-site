@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1100" width="720" height="1100">
+  <rect width="720" height="1100" fill="#1a1a1a" rx="40"/>
+  <!-- Header -->
+  <g transform="translate(360,80)" fill="#e8e6e1" font-family="-apple-system,Helvetica,Arial" font-size="26" text-anchor="middle">
+    <path d="M-100,-2 a14,14 0 1 0 28,0 a14,14 0 1 0 -28,0 M-93,-2 l4,5 8,-10" fill="none" stroke="#e8e6e1" stroke-width="2.5"/>
+    <text x="20" y="6">Google Play Защита</text>
+  </g>
+  <!-- Title -->
+  <g fill="#fff" font-family="-apple-system,Helvetica,Arial" font-size="44" text-anchor="middle" font-weight="400">
+    <text x="360" y="200">Приложение</text>
+    <text x="360" y="258">заблокировано для</text>
+    <text x="360" y="316">защиты устройства</text>
+  </g>
+  <!-- App card -->
+  <g transform="translate(80,400)">
+    <rect width="560" height="120" rx="60" fill="#2a2a2a"/>
+    <g transform="translate(40,30)">
+      <rect width="60" height="60" rx="14" fill="#e2dfcd"/>
+      <text x="30" y="35" font-family="-apple-system,Helvetica,Arial" font-size="11" font-weight="700" fill="#1c1b17" text-anchor="middle">Резерв</text>
+      <text x="46" y="35" font-family="-apple-system,Helvetica,Arial" font-size="11" font-weight="700" fill="#fc8809">+</text>
+      <circle cx="55" cy="55" r="11" fill="#f7b500" stroke="#1a1a1a" stroke-width="3"/>
+      <text x="55" y="60" font-family="-apple-system,Helvetica,Arial" font-size="14" font-weight="700" fill="#1a1a1a" text-anchor="middle">!</text>
+    </g>
+    <text x="140" y="72" font-family="-apple-system,Helvetica,Arial" font-size="32" fill="#fff">Резерв+</text>
+  </g>
+  <!-- Body -->
+  <g fill="#bdb9b0" font-family="-apple-system,Helvetica,Arial" font-size="24">
+    <text x="60" y="600">Play Защита никогда не проверяла</text>
+    <text x="60" y="636">приложение этого разработчика. Оно может</text>
+    <text x="60" y="672">быть небезопасным.</text>
+    <text x="60" y="740">Это приложение может представлять угрозу</text>
+    <text x="60" y="776">для устройства. <tspan text-decoration="underline" fill="#e8e6e1">Подробнее</tspan> о Play Защите.</text>
+  </g>
+  <!-- "Все равно установить" with red circle -->
+  <g>
+    <text x="60" y="870" font-family="-apple-system,Helvetica,Arial" font-size="26" fill="#e8e6e1">Все равно установить</text>
+    <ellipse cx="220" cy="864" rx="240" ry="36" fill="none" stroke="#ff2d2d" stroke-width="6"/>
+  </g>
+  <!-- OK button -->
+  <g transform="translate(60,950)">
+    <rect width="600" height="100" rx="50" fill="#cad7f4"/>
+    <text x="300" y="64" font-family="-apple-system,Helvetica,Arial" font-size="32" font-weight="500" fill="#1a1a1a" text-anchor="middle">ОК</text>
+  </g>
+</svg>
