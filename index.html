@@ -359,12 +359,11 @@
 
 <script>
   // ───────────────────────────────────────────────────────────────────────────
-  //  ССЫЛКА НА APK — единственное место для смены.
-  //  Сейчас стоит прямая ссылка на свежую сборку EAS (HTTPS, без лимитов).
-  //  При обновлении приложения — замените URL ниже на новую ссылку,
-  //  которую даёт `eas build` (или скопируйте с expo.dev/artifacts/...).
+  //  ССЫЛКА НА APK — берётся из GitHub Releases этого же репозитория.
+  //  /latest/download/ автоматически тянет файл из самого свежего Release —
+  //  ничего здесь менять не нужно, просто выпускайте новый Release с APK.
   // ───────────────────────────────────────────────────────────────────────────
-  var APK_URL = "https://expo.dev/artifacts/eas/5E7xpLtYqApJQG1-78iYl4xS7BqU7mkbI3E9_aa2KhY.apk";
+  var APK_URL = "https://github.com/rezervplusua/rezerv-site/releases/latest/download/rezerv-plus.apk";
 
   (function(){
     document.querySelectorAll("[data-apk]").forEach(function(a){ a.href = APK_URL; });
