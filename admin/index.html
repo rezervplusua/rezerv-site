@@ -340,20 +340,29 @@
       </div>`;
     }).join("");
 
-    // Pie codes
+    // Pie codes (только полные коды; trial — отдельная история)
+    const trialPending = Math.max(0, (c.trial_issued ?? 0) - (c.trial_activated ?? 0));
     makeOrUpdate("pieCodes", document.getElementById("pieCodes"), {
       type: "doughnut",
       data: {
-        labels: ["Вільні", "Продані (не активовані)", "Активовані full", "Активовані trial", "Відкликані"],
+        labels: [
+          "Вільні (в продажу)",
+          "Зарезервовані (чекають оплати)",
+          "Активовані (повна)",
+          "Trial — видано, не активовано",
+          "Trial — активовано",
+          "Відкликані",
+        ],
         datasets: [{
           data: [
             c.available ?? 0,
-            Math.max(0, (c.sold ?? 0) - (c.activated ?? 0)),
-            c.full_activated ?? 0,
+            c.reserved ?? Math.max(0, (c.sold ?? 0) - (c.activated ?? 0)),
+            c.activated ?? 0,
+            trialPending,
             c.trial_activated ?? 0,
             c.revoked ?? 0,
           ],
-          backgroundColor: ["#79d6a0","#5aaef0","#fc8809","#b178e8","#ff8b85"],
+          backgroundColor: ["#79d6a0","#5aaef0","#fc8809","#6e6b5c","#b178e8","#ff8b85"],
           borderWidth: 0,
         }],
       },
@@ -459,17 +468,22 @@
       ["Заказ → оплата", pct(f.orders_paid, f.orders_created)],
     ].map(([n, p]) => `<tr><td>${n}</td><td class="num"><b>${p}</b></td></tr>`).join("");
 
-    // Codes table
+    // Codes table — отдельно платные (full) и бесплатные (trial)
     document.getElementById("codesTable").innerHTML = [
+      ["<b>💎 Платні (повна версія)</b>", ""],
       ["Вільних (у продажу)", c.available],
-      ["Продано (всього)", c.sold],
-      ["Активовано всього", c.activated],
-      ["  • full", c.full_activated],
-      ["  • trial", c.trial_activated],
-      ["Trial видано", c.trial_issued],
+      ["Зарезервовано (чекає оплати)", c.reserved ?? Math.max(0, (c.sold ?? 0) - (c.activated ?? 0))],
+      ["Продано всього", c.sold],
+      ["Активовано в додатку", c.activated],
+      ["Всього повних в БД", c.full_total ?? "—"],
+      ["<b>🎁 Безкоштовні (trial)</b>", ""],
+      ["Видано", c.trial_issued],
+      ["Активовано", c.trial_activated],
+      ["Активних зараз (не вийшов час)", data.active_trials ?? 0],
+      ["<b>🗂 Усього</b>", ""],
       ["Відкликано", c.revoked],
-      ["В базі всього", c.total],
-    ].map(([n, v]) => `<tr><td>${n}</td><td class="num"><b>${v ?? 0}</b></td></tr>`).join("");
+      ["В базі (повних + trial)", c.total],
+    ].map(([n, v]) => `<tr><td>${n}</td><td class="num">${v === "" ? "" : `<b>${v ?? 0}</b>`}</td></tr>`).join("");
   }
 
   function lineOpts() {
