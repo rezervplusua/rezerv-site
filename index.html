@@ -119,6 +119,11 @@
   .hint{font-size:13.5px;color:#9c9686}
   .pricepill{display:inline-flex;align-items:center;gap:8px;margin-top:6px;background:rgba(255,255,255,.06);
     border:1px solid rgba(255,255,255,.12);padding:9px 15px;border-radius:999px;font-weight:700;font-size:15px;color:#f3f1e6}
+  .uah-pill{background:rgba(46,158,91,.22);color:#79d6a0;font-weight:700;font-size:13.5px;
+    padding:3px 10px;border-radius:999px;margin-left:2px}
+  .price-uah{font-size:18px;font-weight:700;color:var(--ok);margin:-2px 0 10px}
+  .plan.full .price-uah{color:#79d6a0}
+  .buybox .price-uah{color:#79d6a0;margin-top:-6px;margin-bottom:14px}
 
   /* phone with real screenshot */
   .phone{justify-self:center;width:300px;background:#0f0e0c;border-radius:42px;
@@ -240,7 +245,7 @@
         <a class="btn btn-primary apkBtn" href="#" data-apk download data-ua="⬇ Завантажити APK" data-ru="⬇ Скачать APK"></a>
         <a class="btn btn-trial botBtn" href="https://t.me/rezervplu_bot" target="_blank" rel="noopener" data-ua="🎁 Тест на 1 годину" data-ru="🎁 Тест на 1 час"></a>
       </div>
-      <div class="pricepill"><span>💎</span><span class="price" data-ua="Повна версія — 26 USDT (мережа TRON)" data-ru="Полная версия — 26 USDT (сеть TRON)"></span></div>
+      <div class="pricepill"><span>💎</span><span class="price" data-ua="Повна версія — 26 USDT" data-ru="Полная версия — 26 USDT"></span><span class="uah-pill" data-uah-of="26"></span></div>
       <p class="hint mt" data-ua="Для Android. iPhone не підтримується." data-ru="Для Android. iPhone не поддерживается."></p>
     </div>
 
@@ -274,6 +279,7 @@
         <span class="tag" data-ua="💎 ПОВНА ВЕРСІЯ" data-ru="💎 ПОЛНАЯ ВЕРСИЯ"></span>
         <h3 data-ua="Без обмежень назавжди" data-ru="Без ограничений навсегда"></h3>
         <div class="price-big">26 USDT</div>
+        <div class="price-uah" data-uah-of="26" data-uah-style="big"></div>
         <p data-ua="Один код — один телефон. Один раз купив — користуєтесь скільки треба." data-ru="Один код — один телефон. Один раз купили — пользуетесь сколько нужно."></p>
         <ul>
           <li data-ua="Без обмежень за часом" data-ru="Без ограничений по времени"></li>
@@ -390,7 +396,8 @@
     <div class="buybox">
       <div data-ua="Ціна повної версії" data-ru="Цена полной версии"></div>
       <div class="big">26 USDT</div>
-      <p data-ua="Один код — один телефон. Оплата в мережі TRON (TRC-20)." data-ru="Один код — один телефон. Оплата в сети TRON (TRC-20)."></p>
+      <div class="price-uah" data-uah-of="26" data-uah-style="big"></div>
+      <p data-ua="Один код — один телефон. Оплата в мережі TRON (TRC-20). Працює навіки." data-ru="Один код — один телефон. Оплата в сети TRON (TRC-20). Работает навсегда."></p>
       <a class="btn btn-primary btn-block botBtn" href="https://t.me/rezervplu_bot" target="_blank" rel="noopener" data-ua="🛒 Купити код у Telegram" data-ru="🛒 Купить код в Telegram"></a>
     </div>
   </div>
@@ -402,7 +409,7 @@
     <h2 data-ua="Питання та відповіді" data-ru="Вопросы и ответы"></h2>
     <div class="faq mt">
       <details><summary data-ua="Як працює безкоштовний тест?" data-ru="Как работает бесплатный тест?"></summary><p data-ua="Натисніть «🎁 Тест на 1 годину» у Telegram-боті — отримаєте код. Введіть його у додатку. Працюватиме повністю як платна версія рівно 60 хвилин. Один тест на акаунт і на один телефон." data-ru="Нажмите «🎁 Тест на 1 час» в Telegram-боте — получите код. Введите его в приложении. Будет работать полностью как платная версия ровно 60 минут. Один тест на аккаунт и на один телефон."></p></details>
-      <details><summary data-ua="Скільки коштує повна версія?" data-ru="Сколько стоит полная версия?"></summary><p data-ua="26 USDT у мережі TRON (TRC-20). Оплата через Telegram-бота." data-ru="26 USDT в сети TRON (TRC-20). Оплата через Telegram-бота."></p></details>
+      <details><summary data-ua="Скільки коштує повна версія?" data-ru="Сколько стоит полная версия?"></summary><p data-ua="26 USDT (приблизно у гривнях <span data-uah-of='26' data-uah-style='inline'></span>) у мережі TRON (TRC-20). Це одноразова оплата — додаток працює назавжди на одному телефоні. Оплата через Telegram-бота." data-ru="26 USDT (примерно в гривнах <span data-uah-of='26' data-uah-style='inline'></span>) в сети TRON (TRC-20). Это одноразовая оплата — приложение работает навсегда на одном телефоне. Оплата через Telegram-бота."></p></details>
       <details><summary data-ua="На скільки пристроїв діє код?" data-ru="На сколько устройств действует код?"></summary><p data-ua="Один код активує один телефон." data-ru="Один код активирует один телефон."></p></details>
       <details><summary data-ua="Де зберігаються мої дані?" data-ru="Где хранятся мои данные?"></summary><p data-ua="Лише на вашому пристрої. Додаток працює офлайн." data-ru="Только на вашем устройстве. Приложение работает офлайн."></p></details>
       <details><summary data-ua="Чому Google Play Захист блокує встановлення?" data-ru="Почему Google Play Защита блокирует установку?"></summary><p data-ua="Це звичайно для додатків поза Google Play. Дивіться розділ «Якщо Google Play Захист блокує встановлення» вище — 2 кроки." data-ru="Это обычно для приложений вне Google Play. Смотрите раздел «Если Google Play Защита блокирует установку» выше — 2 шага."></p></details>
@@ -433,6 +440,42 @@
   //  Учитывается только: визит, клик "скачать APK", клик "в Telegram".
   //  Никаких сторонних трекеров, никаких куки.
   // ───────────────────────────────────────────────────────────────────────────
+  // ───────────────────────────────────────────────────────────────────────────
+  //  Курс USDT → ₴ через CoinGecko (без ключа, free). Подставляется во все
+  //  элементы [data-uah-of="<число USDT>"]. Кешируем в localStorage на 30 мин.
+  // ───────────────────────────────────────────────────────────────────────────
+  (function(){
+    var CACHE_KEY = "rezerv_uah_rate";
+    var TTL = 30 * 60 * 1000;
+    function pad(n){ return new Intl.NumberFormat('uk-UA').format(n); }
+    function applyRate(uahPerUsdt){
+      document.querySelectorAll('[data-uah-of]').forEach(function(el){
+        var usdt = Number(el.getAttribute('data-uah-of')) || 0;
+        var uah = Math.round(usdt * uahPerUsdt);
+        var style = el.getAttribute('data-uah-style') || 'pill';
+        if (style === 'big')        el.textContent = '≈ ' + pad(uah) + ' ₴';
+        else if (style === 'inline') el.textContent = pad(uah) + ' ₴';
+        else                          el.textContent = '≈ ' + pad(uah) + ' ₴';
+        if (style === 'pill') el.classList.add('uah-pill');
+      });
+    }
+    // Сначала пробуем кеш — чтоб UI не мигал.
+    try {
+      var c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+      if (c && Date.now() - c.ts < TTL && c.rate) applyRate(c.rate);
+    } catch(e){}
+    // И параллельно фоном тянем свежий.
+    fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=uah')
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        var rate = j && j.tether && j.tether.uah;
+        if (rate) {
+          applyRate(rate);
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ rate: rate, ts: Date.now() })); } catch(e){}
+        }
+      }).catch(function(){});
+  })();
+
   var SB_URL = "https://ruphkmcecsfacatsanpi.supabase.co";
   var SB_KEY = "sb_publishable_ON7U-_lH254np35P2nj3vQ_ffL4-25t";
   function vid() {
