@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<!--
+  Резерв+ — приватный админ-дашборд.
+  Защищён токеном в URL hash: #token=<длинный_токен>
+  Без токена показывает форму ввода. Без верного токена данные не отдаются.
+  Hash в URL не уходит на сервер, не пишется в логи.
+-->
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Резерв+ Admin Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#1c1b17; --bg2:#24221d; --panel:#26241f; --panel2:#2f2c25;
+    --line:#3a372f; --ink:#f3f1e6; --muted:#9c9686;
+    --accent:#fc8809; --green:#2e9e5b; --red:#d32016; --blue:#5aaef0; --purple:#b178e8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1280px;margin:0 auto;padding:24px}
+  header{display:flex;justify-content:space-between;align-items:center;padding:18px 0 28px;border-bottom:1px solid var(--line);margin-bottom:28px}
+  .logo{font-size:22px;font-weight:800;letter-spacing:.3px}
+  .logo .plus{color:var(--accent)}
+  .meta{color:var(--muted);font-size:13px}
+  .meta b{color:var(--ink)}
+  .pill{display:inline-block;background:rgba(46,158,91,.16);color:#79d6a0;font-weight:700;font-size:12px;padding:3px 10px;border-radius:999px;margin-left:8px}
+
+  /* Auth screen */
+  .auth{max-width:520px;margin:60px auto;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:36px}
+  .auth h1{margin:0 0 8px;font-size:24px}
+  .auth p{color:var(--muted);margin:0 0 20px;font-size:14.5px}
+  .auth input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px;color:var(--ink);font-size:15px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  .auth input:focus{outline:none;border-color:var(--accent)}
+  .auth button{margin-top:14px;width:100%;background:var(--accent);color:#1c1b17;border:none;border-radius:10px;padding:14px;font-weight:700;font-size:15px;cursor:pointer}
+  .auth .err{color:#ff7a72;font-size:13.5px;margin-top:10px;min-height:18px}
+
+  /* Big numbers grid */
+  .row{display:grid;gap:18px;margin-bottom:20px}
+  .kpis{grid-template-columns:repeat(6,1fr)}
+  .charts{grid-template-columns:2fr 1fr}
+  .lines{grid-template-columns:1fr 1fr}
+  @media(max-width:1024px){.kpis{grid-template-columns:repeat(3,1fr)}.charts{grid-template-columns:1fr}.lines{grid-template-columns:1fr}}
+  @media(max-width:640px){.kpis{grid-template-columns:repeat(2,1fr)}}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px}
+  .card h3{margin:0 0 6px;font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  .card .v{font-size:34px;font-weight:800;line-height:1.1;margin:6px 0 2px}
+  .card .sv{color:var(--muted);font-size:13px}
+  .card.accent .v{color:var(--accent)}
+  .card.green .v{color:#79d6a0}
+  .card.blue .v{color:var(--blue)}
+  .card.purple .v{color:var(--purple)}
+  .card.red .v{color:#ff8b85}
+
+  .chartwrap{position:relative;height:260px;margin-top:8px}
+  .pieswrap{position:relative;height:220px;margin-top:8px}
+  .panel-title{font-size:15px;font-weight:700;margin:0 0 12px}
+
+  /* Funnel */
+  .funnel{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+  .funnel-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line)}
+  .funnel-row:last-child{border:none}
+  .funnel-label{flex:1;font-size:14.5px}
+  .funnel-num{font-weight:800;font-size:18px;color:var(--ink);min-width:60px;text-align:right}
+  .funnel-pct{color:var(--muted);font-size:12.5px;min-width:60px;text-align:right}
+  .funnel-bar{height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+  .funnel-bar > div{height:100%;background:linear-gradient(90deg,var(--accent),#ffb056)}
+
+  /* Tables */
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:11px}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+
+  .btn-refresh{background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
+  .btn-refresh:hover{color:var(--ink);border-color:var(--accent)}
+
+  .footer{margin:30px 0 10px;color:var(--muted);font-size:12px;text-align:center}
+  .footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- Экран ввода токена -->
+<div id="auth" class="wrap" style="display:none">
+  <div class="auth">
+    <h1>🔒 Резерв<span style="color:var(--accent)">+</span> Admin</h1>
+    <p>Введіть адмін-токен. Він зберігається у браузері (localStorage) — більше вводити не потрібно.</p>
+    <input id="tokenInput" type="password" placeholder="admin token" autocomplete="off">
+    <button id="authBtn">Увійти</button>
+    <div id="authErr" class="err"></div>
+  </div>
+</div>
+
+<!-- Сам дашборд -->
+<div id="dash" class="wrap" style="display:none">
+  <header>
+    <div>
+      <div class="logo">Резерв<span class="plus">+</span> · Admin Dashboard <span class="pill" id="liveBadge">ONLINE</span></div>
+      <div class="meta">оновлено: <b id="generatedAt">…</b> · авто-оновлення кожні 30 сек</div>
+    </div>
+    <div>
+      <button class="btn-refresh" id="refreshBtn">↻ Оновити</button>
+      <button class="btn-refresh" id="logoutBtn" style="margin-left:8px">Вийти</button>
+    </div>
+  </header>
+
+  <!-- KPI cards -->
+  <div class="row kpis">
+    <div class="card accent">
+      <h3>Касса</h3>
+      <div class="v" id="kpiBalance">—</div>
+      <div class="sv">USDT не виведено</div>
+    </div>
+    <div class="card green">
+      <h3>Вільних кодів</h3>
+      <div class="v" id="kpiAvailable">—</div>
+      <div class="sv" id="kpiAvailableSub">всього: —</div>
+    </div>
+    <div class="card blue">
+      <h3>Унік. користувачів бота</h3>
+      <div class="v" id="kpiBotUsers">—</div>
+      <div class="sv">Всього /start</div>
+    </div>
+    <div class="card purple">
+      <h3>Унік. відвідувачів сайту</h3>
+      <div class="v" id="kpiVisitors">—</div>
+      <div class="sv" id="kpiVisitorsSub">за 7 днів: —</div>
+    </div>
+    <div class="card">
+      <h3>Активних trial</h3>
+      <div class="v" id="kpiActiveTrials">—</div>
+      <div class="sv">прямо зараз</div>
+    </div>
+    <div class="card red">
+      <h3>Звернень підтримки</h3>
+      <div class="v" id="kpiSupport">—</div>
+      <div class="sv" id="kpiSupportSub">відповіли: —</div>
+    </div>
+  </div>
+
+  <!-- Funnel + Pie codes -->
+  <div class="row charts">
+    <div class="card">
+      <h3 class="panel-title">📉 Воронка (за весь час)</h3>
+      <div class="funnel" id="funnel"></div>
+    </div>
+    <div class="card">
+      <h3 class="panel-title">📦 Коди активації</h3>
+      <div class="pieswrap"><canvas id="pieCodes"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Line charts -->
+  <div class="row lines">
+    <div class="card">
+      <h3 class="panel-title">🌐 Сайт за 30 днів</h3>
+      <div class="chartwrap"><canvas id="lineSite"></canvas></div>
+    </div>
+    <div class="card">
+      <h3 class="panel-title">🤖 Бот за 30 днів</h3>
+      <div class="chartwrap"><canvas id="lineBot"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Detail tables -->
+  <div class="row lines">
+    <div class="card">
+      <h3 class="panel-title">📊 Події (24г / 7д / 30д / всього)</h3>
+      <table>
+        <thead><tr><th>Подія</th><th class="num">24г</th><th class="num">7д</th><th class="num">30д</th><th class="num">Всього</th></tr></thead>
+        <tbody id="evtTable"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3 class="panel-title">💎 Конверсія</h3>
+      <table>
+        <thead><tr><th>Перехід</th><th class="num">%</th></tr></thead>
+        <tbody id="convTable"></tbody>
+      </table>
+      <h3 class="panel-title" style="margin-top:20px">📦 Розподіл кодів</h3>
+      <table>
+        <thead><tr><th>Категорія</th><th class="num">Шт.</th></tr></thead>
+        <tbody id="codesTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    <a href="/rezerv-site/" target="_blank">← публічний сайт</a> ·
+    <a href="https://t.me/rezervplu_bot" target="_blank">бот @rezervplu_bot</a>
+  </div>
+</div>
+
+<script>
+  const SB_URL = "https://ruphkmcecsfacatsanpi.supabase.co";
+  const SB_KEY = "sb_publishable_ON7U-_lH254np35P2nj3vQ_ffL4-25t";
+  const TOKEN_KEY = "rezerv_admin_token";
+
+  function getTokenFromUrl() {
+    if (location.hash.startsWith("#token=")) {
+      const t = location.hash.slice(7);
+      try { localStorage.setItem(TOKEN_KEY, t); } catch(e){}
+      // Чистим URL чтобы токен не светился в адресной строке.
+      history.replaceState(null, "", location.pathname);
+      return t;
+    }
+    try { return localStorage.getItem(TOKEN_KEY); } catch(e) { return null; }
+  }
+
+  function showAuth(err) {
+    document.getElementById("auth").style.display = "block";
+    document.getElementById("dash").style.display = "none";
+    document.getElementById("authErr").textContent = err || "";
+    document.getElementById("tokenInput").focus();
+  }
+
+  function showDash() {
+    document.getElementById("auth").style.display = "none";
+    document.getElementById("dash").style.display = "block";
+  }
+
+  async function fetchData(token) {
+    const res = await fetch(SB_URL + "/rest/v1/rpc/dashboard_data", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: SB_KEY },
+      body: JSON.stringify({ p_token: token }),
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return await res.json();
+  }
+
+  // ─── Charts state ────────────────────────────────────────────────────────
+  let charts = {};
+
+  function makeOrUpdate(name, ctx, config) {
+    if (charts[name]) {
+      charts[name].data = config.data;
+      charts[name].options = config.options;
+      charts[name].update();
+    } else {
+      charts[name] = new Chart(ctx, config);
+    }
+  }
+
+  function fmtDate(d) { return d.slice(5); /* MM-DD */ }
+
+  function renderEverything(data) {
+    document.getElementById("generatedAt").textContent = data.generated_at;
+
+    const c = data.codes || {};
+    const v = data.visitors || {};
+    const ev = data.events || {};
+    const sup = ev.support_message || { d1:0,d7:0,d30:0,total:0 };
+    const supR = ev.support_reply || { d1:0,d7:0,d30:0,total:0 };
+
+    // KPIs
+    document.getElementById("kpiAvailable").textContent = c.available ?? 0;
+    document.getElementById("kpiAvailableSub").textContent = `всього: ${c.total ?? 0}`;
+    document.getElementById("kpiBotUsers").textContent = data.bot_users_unique ?? 0;
+    document.getElementById("kpiVisitors").textContent = v.total ?? 0;
+    document.getElementById("kpiVisitorsSub").textContent = `за 7 днів: ${v.d7 ?? 0}`;
+    document.getElementById("kpiActiveTrials").textContent = data.active_trials ?? 0;
+    document.getElementById("kpiSupport").textContent = sup.total ?? 0;
+    document.getElementById("kpiSupportSub").textContent = `відповіли: ${supR.total ?? 0}`;
+    // Касса — приблизно: 26 USDT * (orders_paid total)
+    const orderPaidTotal = ev.order_paid?.total ?? 0;
+    document.getElementById("kpiBalance").textContent = (orderPaidTotal * 26).toFixed(0);
+
+    // Funnel
+    const f = data.funnel || {};
+    const funnelData = [
+      { label: "🌐 Відвідувань сайту", n: f.site_visits },
+      { label: "🔗 Кліків «в Telegram»", n: f.site_bot_clicks },
+      { label: "🤖 Унікальних користувачів бота", n: f.bot_users_unique },
+      { label: "🎁 Trial-кодів видано", n: f.trial_issued },
+      { label: "🛒 Заказів створено", n: f.orders_created },
+      { label: "💰 Заказів оплачено", n: f.orders_paid },
+    ];
+    const top = Math.max(1, funnelData[0].n || 1);
+    document.getElementById("funnel").innerHTML = funnelData.map((it, i) => {
+      const pct = ((it.n / top) * 100).toFixed(0);
+      const stepPct = i > 0
+        ? funnelData[i-1].n > 0
+          ? Math.round((it.n / funnelData[i-1].n) * 100) + "%"
+          : "—"
+        : "100%";
+      return `<div class="funnel-row">
+        <div class="funnel-label">${it.label}</div>
+        <div style="flex:1.5">
+          <div class="funnel-bar"><div style="width:${pct}%"></div></div>
+        </div>
+        <div class="funnel-num">${it.n ?? 0}</div>
+        <div class="funnel-pct">${stepPct}</div>
+      </div>`;
+    }).join("");
+
+    // Pie codes
+    makeOrUpdate("pieCodes", document.getElementById("pieCodes"), {
+      type: "doughnut",
+      data: {
+        labels: ["Вільні", "Продані (не активовані)", "Активовані full", "Активовані trial", "Відкликані"],
+        datasets: [{
+          data: [
+            c.available ?? 0,
+            Math.max(0, (c.sold ?? 0) - (c.activated ?? 0)),
+            c.full_activated ?? 0,
+            c.trial_activated ?? 0,
+            c.revoked ?? 0,
+          ],
+          backgroundColor: ["#79d6a0","#5aaef0","#fc8809","#b178e8","#ff8b85"],
+          borderWidth: 0,
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: "right", labels: { color: "#f3f1e6", font: { size: 12 } } } }
+      }
+    });
+
+    // Line: сайт
+    const d = data.by_day || {};
+    const labels = (d.days || []).map(fmtDate);
+    makeOrUpdate("lineSite", document.getElementById("lineSite"), {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          { label: "Візити", data: d.visits || [], borderColor: "#b178e8", backgroundColor: "rgba(177,120,232,.18)", fill: true, tension: .35 },
+          { label: "Клік APK", data: d.apk_clicks || [], borderColor: "#fc8809", backgroundColor: "rgba(252,136,9,.18)", fill: true, tension: .35 },
+          { label: "Клік бот", data: d.bot_clicks || [], borderColor: "#5aaef0", backgroundColor: "rgba(90,174,240,.18)", fill: true, tension: .35 },
+        ],
+      },
+      options: lineOpts(),
+    });
+
+    // Line: бот
+    makeOrUpdate("lineBot", document.getElementById("lineBot"), {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          { label: "Старти /start", data: d.bot_starts || [], borderColor: "#79d6a0", backgroundColor: "rgba(121,214,160,.18)", fill: true, tension: .35 },
+          { label: "Скачали APK у боті", data: d.apk_bot || [], borderColor: "#fc8809", backgroundColor: "rgba(252,136,9,.18)", fill: true, tension: .35 },
+          { label: "Trial видано", data: d.trials || [], borderColor: "#b178e8", backgroundColor: "rgba(177,120,232,.18)", fill: true, tension: .35 },
+          { label: "Оплат", data: d.orders_paid || [], borderColor: "#ff8b85", backgroundColor: "rgba(255,139,133,.18)", fill: true, tension: .35 },
+        ],
+      },
+      options: lineOpts(),
+    });
+
+    // Events table
+    const evtTypes = [
+      ["site_visit", "🌐 Візит сайту"],
+      ["site_apk_click", "📲 Клік APK на сайті"],
+      ["site_bot_click", "🔗 Клік «в Telegram» на сайті"],
+      ["bot_start", "🤖 /start у боті"],
+      ["apk_download_bot", "📲 APK у боті"],
+      ["trial_issued", "🎁 Trial видано"],
+      ["trial_denied", "🚫 Trial відмовлено"],
+      ["order_created", "🛒 Заказ створено"],
+      ["order_paid", "💰 Заказ оплачено"],
+      ["buy_out_of_stock", "📦 Купівля без кодів"],
+      ["support_message", "✉️ Звернення підтримки"],
+      ["support_reply", "↩️ Відповідь адміна"],
+    ];
+    document.getElementById("evtTable").innerHTML = evtTypes.map(([k, name]) => {
+      const x = ev[k] || { d1:0,d7:0,d30:0,total:0 };
+      return `<tr><td>${name}</td><td class="num">${x.d1}</td><td class="num">${x.d7}</td><td class="num">${x.d30}</td><td class="num"><b>${x.total}</b></td></tr>`;
+    }).join("");
+
+    // Conversion table
+    function pct(num, denom) { return denom > 0 ? Math.round((num / denom) * 100) + "%" : "—"; }
+    document.getElementById("convTable").innerHTML = [
+      ["Сайт → клік у Telegram", pct(f.site_bot_clicks, f.site_visits)],
+      ["Сайт → користувач бота", pct(f.bot_users_unique, f.site_visits)],
+      ["Юзер бота → trial", pct(f.trial_issued, f.bot_users_unique)],
+      ["Trial → купівля", pct(f.orders_paid, f.trial_issued)],
+      ["Заказ → оплата", pct(f.orders_paid, f.orders_created)],
+    ].map(([n, p]) => `<tr><td>${n}</td><td class="num"><b>${p}</b></td></tr>`).join("");
+
+    // Codes table
+    document.getElementById("codesTable").innerHTML = [
+      ["Вільних (у продажу)", c.available],
+      ["Продано (всього)", c.sold],
+      ["Активовано всього", c.activated],
+      ["  • full", c.full_activated],
+      ["  • trial", c.trial_activated],
+      ["Trial видано", c.trial_issued],
+      ["Відкликано", c.revoked],
+      ["В базі всього", c.total],
+    ].map(([n, v]) => `<tr><td>${n}</td><td class="num"><b>${v ?? 0}</b></td></tr>`).join("");
+  }
+
+  function lineOpts() {
+    return {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { labels: { color: "#cfcabf", font: { size: 12 } } },
+      },
+      scales: {
+        x: { grid: { color: "#3a372f" }, ticks: { color: "#9c9686", maxRotation: 0, autoSkip: true } },
+        y: { grid: { color: "#3a372f" }, ticks: { color: "#9c9686", precision: 0 }, beginAtZero: true },
+      },
+    };
+  }
+
+  // ─── Boot ────────────────────────────────────────────────────────────────
+  let currentToken = null;
+  let refreshTimer = null;
+
+  async function refresh() {
+    try {
+      const data = await fetchData(currentToken);
+      if (!data || !data.ok) {
+        if (data && data.reason === "denied") {
+          showAuth("Невірний токен.");
+          stopRefresh();
+          try { localStorage.removeItem(TOKEN_KEY); } catch(e){}
+          return;
+        }
+        document.getElementById("liveBadge").textContent = "OFFLINE";
+        return;
+      }
+      document.getElementById("liveBadge").textContent = "ONLINE";
+      renderEverything(data);
+    } catch (e) {
+      console.error(e);
+      document.getElementById("liveBadge").textContent = "ERROR";
+    }
+  }
+
+  function startRefresh() {
+    stopRefresh();
+    refresh();
+    refreshTimer = setInterval(refresh, 30000);
+  }
+  function stopRefresh() {
+    if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
+  }
+
+  document.getElementById("authBtn").addEventListener("click", () => {
+    const t = document.getElementById("tokenInput").value.trim();
+    if (!t) { document.getElementById("authErr").textContent = "Введіть токен."; return; }
+    currentToken = t;
+    try { localStorage.setItem(TOKEN_KEY, t); } catch(e){}
+    showDash();
+    startRefresh();
+  });
+  document.getElementById("tokenInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("authBtn").click();
+  });
+  document.getElementById("refreshBtn").addEventListener("click", refresh);
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    try { localStorage.removeItem(TOKEN_KEY); } catch(e){}
+    currentToken = null;
+    stopRefresh();
+    showAuth();
+  });
+
+  const initial = getTokenFromUrl();
+  if (initial) {
+    currentToken = initial;
+    showDash();
+    startRefresh();
+  } else {
+    showAuth();
+  }
+</script>
+</body>
+</html>
