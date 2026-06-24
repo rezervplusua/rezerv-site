@@ -81,6 +81,16 @@
 
   .footer{margin:30px 0 10px;color:var(--muted);font-size:12px;text-align:center}
   .footer a{color:var(--muted)}
+
+  /* Алерт-баннер «коды заканчиваются» */
+  .alert{background:linear-gradient(135deg,#d32016,#ff5247);color:#fff;border-radius:14px;
+    padding:16px 22px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 8px 26px rgba(211,32,22,.4);animation:alert-pulse 2.4s ease-in-out infinite}
+  @keyframes alert-pulse{0%,100%{box-shadow:0 8px 26px rgba(211,32,22,.4)}50%{box-shadow:0 8px 38px rgba(211,32,22,.7)}}
+  .alert .a-title{font-weight:800;font-size:17px;margin:0 0 2px}
+  .alert .a-sub{font-size:13.5px;opacity:.92}
+  .alert .a-cta{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.4);
+    border-radius:999px;padding:8px 16px;font-weight:700;font-size:13px;text-decoration:none}
 </style>
 </head>
 <body>
@@ -108,6 +118,15 @@
       <button class="btn-refresh" id="logoutBtn" style="margin-left:8px">Вийти</button>
     </div>
   </header>
+
+  <!-- Алерт «коды заканчиваются» -->
+  <div class="alert" id="lowStockAlert" style="display:none">
+    <div>
+      <div class="a-title">🚨 Коди майже закінчилися!</div>
+      <div class="a-sub">Залишилось <b id="lowStockN">—</b> кодів у продажу. Поповніть базу через <code>tools/gen-codes.mjs</code> + <code>tools/import-codes.sql</code>.</div>
+    </div>
+    <a class="a-cta" href="https://github.com/rezervplusua/rezerv-site" target="_blank">Подробиці →</a>
+  </div>
 
   <!-- KPI cards -->
   <div class="row kpis">
@@ -164,6 +183,18 @@
     <div class="card">
       <h3 class="panel-title">🤖 Бот за 30 днів</h3>
       <div class="chartwrap"><canvas id="lineBot"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Распределение по часам и дням недели -->
+  <div class="row lines">
+    <div class="card">
+      <h3 class="panel-title">⏰ Активність по годинах доби (Київ, 30 днів)</h3>
+      <div class="chartwrap"><canvas id="barHours"></canvas></div>
+    </div>
+    <div class="card">
+      <h3 class="panel-title">📅 Активність по днях тижня (30 днів)</h3>
+      <div class="chartwrap"><canvas id="barDow"></canvas></div>
     </div>
   </div>
 
@@ -251,6 +282,16 @@
 
   function renderEverything(data) {
     document.getElementById("generatedAt").textContent = data.generated_at;
+
+    // Алерт «коды заканчиваются».
+    const c0 = data.codes || {};
+    const lowAlert = document.getElementById("lowStockAlert");
+    if (data.low_stock || (c0.available ?? 99) <= 5) {
+      lowAlert.style.display = "flex";
+      document.getElementById("lowStockN").textContent = c0.available ?? 0;
+    } else {
+      lowAlert.style.display = "none";
+    }
 
     const c = data.codes || {};
     const v = data.visitors || {};
@@ -351,6 +392,41 @@
         ],
       },
       options: lineOpts(),
+    });
+
+    // Bar: по часам суток (Kyiv)
+    const bh = data.by_hour || { hours: [], visits: [] };
+    const peakHourIdx = (bh.visits || []).reduce((mi, v, i, a) => (v > a[mi] ? i : mi), 0);
+    makeOrUpdate("barHours", document.getElementById("barHours"), {
+      type: "bar",
+      data: {
+        labels: (bh.hours || []).map((h) => String(h).padStart(2, "0") + ":00"),
+        datasets: [{
+          label: "Візити",
+          data: bh.visits || [],
+          backgroundColor: (bh.visits || []).map((_, i) => i === peakHourIdx ? "#fc8809" : "rgba(177,120,232,.55)"),
+          borderRadius: 4,
+        }],
+      },
+      options: { ...lineOpts(), plugins: { legend: { display: false }, tooltip: { callbacks: { title: (it) => "Година " + it[0].label } } } },
+    });
+
+    // Bar: по дням недели (1=Пн … 7=Нд)
+    const bd = data.by_dow || { dows: [], visits: [] };
+    const dowNames = ["", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
+    const peakDowIdx = (bd.visits || []).reduce((mi, v, i, a) => (v > a[mi] ? i : mi), 0);
+    makeOrUpdate("barDow", document.getElementById("barDow"), {
+      type: "bar",
+      data: {
+        labels: (bd.dows || []).map((d) => dowNames[d] || String(d)),
+        datasets: [{
+          label: "Візити",
+          data: bd.visits || [],
+          backgroundColor: (bd.visits || []).map((_, i) => i === peakDowIdx ? "#fc8809" : "rgba(121,214,160,.55)"),
+          borderRadius: 6,
+        }],
+      },
+      options: { ...lineOpts(), plugins: { legend: { display: false } } },
     });
 
     // Events table
