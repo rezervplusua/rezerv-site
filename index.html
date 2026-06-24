@@ -428,8 +428,50 @@
   // ───────────────────────────────────────────────────────────────────────────
   var APK_URL = "https://github.com/rezervplusua/rezerv-site/releases/latest/download/rezerv-plus.apk";
 
+  // ───────────────────────────────────────────────────────────────────────────
+  //  Лёгкая аналитика — пишем в Supabase напрямую через public RPC.
+  //  Учитывается только: визит, клик "скачать APK", клик "в Telegram".
+  //  Никаких сторонних трекеров, никаких куки.
+  // ───────────────────────────────────────────────────────────────────────────
+  var SB_URL = "https://ruphkmcecsfacatsanpi.supabase.co";
+  var SB_KEY = "sb_publishable_ON7U-_lH254np35P2nj3vQ_ffL4-25t";
+  function vid() {
+    try {
+      var k = "rezerv_vid";
+      var v = localStorage.getItem(k);
+      if (!v) {
+        v = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, function(c){
+          return (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & 15) >> (c/4)).toString(16);
+        });
+        localStorage.setItem(k, v);
+      }
+      return v;
+    } catch(e) { return null; }
+  }
+  function track(type, extra) {
+    try {
+      var meta = Object.assign({ visitor_id: vid(), lang: navigator.language || "" }, extra || {});
+      fetch(SB_URL + "/rest/v1/rpc/track_event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: SB_KEY, Prefer: "return=minimal" },
+        body: JSON.stringify({ p_type: type, p_meta: meta }),
+        keepalive: true,
+      }).catch(function(){});
+    } catch(e){}
+  }
+
   (function(){
-    document.querySelectorAll("[data-apk]").forEach(function(a){ a.href = APK_URL; });
+    document.querySelectorAll("[data-apk]").forEach(function(a){
+      a.href = APK_URL;
+      a.addEventListener("click", function(){ track("site_apk_click", { ref: a.className || "" }); });
+    });
+    document.querySelectorAll('a[href*="t.me/"]').forEach(function(a){
+      a.addEventListener("click", function(){ track("site_bot_click", { ref: a.className || "" }); });
+    });
+    // Визит — отправляем после первой отрисовки.
+    if (document.readyState === "complete") track("site_visit");
+    else window.addEventListener("load", function(){ track("site_visit"); });
+
     function apply(l){
       document.documentElement.lang = (l==='ua') ? 'uk' : 'ru';
       try{ localStorage.setItem('rezerv_lang', l); }catch(e){}
