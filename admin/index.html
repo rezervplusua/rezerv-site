@@ -82,6 +82,24 @@
   .footer{margin:30px 0 10px;color:var(--muted);font-size:12px;text-align:center}
   .footer a{color:var(--muted)}
 
+  /* Period selector */
+  .period-bar{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    padding:14px 18px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:20px}
+  .period-bar > .p-label{font-weight:700;font-size:14px;color:var(--muted);margin-right:6px}
+  .period-bar .preset{background:transparent;color:var(--ink);border:1px solid var(--line);
+    border-radius:999px;padding:7px 14px;font-size:13.5px;cursor:pointer;font-weight:600;transition:.15s}
+  .period-bar .preset:hover{border-color:var(--accent);color:var(--accent)}
+  .period-bar .preset.active{background:var(--accent);color:#1c1b17;border-color:var(--accent)}
+  .period-bar input[type=date]{background:var(--bg);color:var(--ink);border:1px solid var(--line);
+    border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px;color-scheme:dark}
+  .period-bar .p-sep{color:var(--muted)}
+  .period-bar .p-current{margin-left:auto;color:var(--muted);font-size:13px}
+  .period-bar .p-current b{color:var(--ink)}
+  /* KPI плашки за период */
+  .period-kpis{grid-template-columns:repeat(6,1fr)}
+  @media(max-width:1024px){.period-kpis{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:640px){.period-kpis{grid-template-columns:repeat(2,1fr)}}
+
   /* Алерт-баннер «коды заканчиваются» */
   .alert{background:linear-gradient(135deg,#d32016,#ff5247);color:#fff;border-radius:14px;
     padding:16px 22px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;
@@ -118,6 +136,37 @@
       <button class="btn-refresh" id="logoutBtn" style="margin-left:8px">Вийти</button>
     </div>
   </header>
+
+  <!-- 📅 Стата за обраний період -->
+  <div class="period-bar">
+    <span class="p-label">📅 Період:</span>
+    <button class="preset" data-preset="today">Сьогодні</button>
+    <button class="preset" data-preset="yesterday">Вчора</button>
+    <button class="preset active" data-preset="7d">7 днів</button>
+    <button class="preset" data-preset="30d">30 днів</button>
+    <span class="p-sep">|</span>
+    <input type="date" id="periodFrom">
+    <span class="p-sep">—</span>
+    <input type="date" id="periodTo">
+    <button class="preset" id="applyCustom">Застосувати</button>
+    <span class="p-current">Поточний: <b id="periodLabel">…</b></span>
+  </div>
+
+  <div class="row period-kpis">
+    <div class="card purple"><h3>🌐 Візити сайту</h3><div class="v" id="pkVisits">—</div><div class="sv" id="pkVisitsSub">унікальних: —</div></div>
+    <div class="card blue"><h3>📲 Клік «Скачати APK»</h3><div class="v" id="pkApkClicks">—</div><div class="sv">з сайту</div></div>
+    <div class="card green"><h3>🔗 Клік «В Telegram»</h3><div class="v" id="pkBotClicks">—</div><div class="sv">з сайту</div></div>
+    <div class="card accent"><h3>🤖 Пишли /start</h3><div class="v" id="pkBotStart">—</div><div class="sv" id="pkBotStartSub">унік: —</div></div>
+    <div class="card"><h3>🎁 Trial видано</h3><div class="v" id="pkTrial">—</div><div class="sv" id="pkTrialSub">відмов: —</div></div>
+    <div class="card red"><h3>💰 Заказів оплачено</h3><div class="v" id="pkPaid">—</div><div class="sv" id="pkPaidSub">створено: —</div></div>
+  </div>
+
+  <div class="row period-kpis" style="grid-template-columns:repeat(4,1fr)">
+    <div class="card green"><h3>📲 APK скачали (бот)</h3><div class="v" id="pkApkBot">—</div></div>
+    <div class="card blue"><h3>📲 Нових встановлень</h3><div class="v" id="pkInstalls">—</div></div>
+    <div class="card accent"><h3>🟢 Активних пристроїв</h3><div class="v" id="pkActive">—</div></div>
+    <div class="card red"><h3>✉️ Підтримка</h3><div class="v" id="pkSupport">—</div></div>
+  </div>
 
   <!-- Алерт «коды заканчиваются» -->
   <div class="alert" id="lowStockAlert" style="display:none">
@@ -305,6 +354,109 @@
     });
     if (!res.ok) throw new Error("HTTP " + res.status);
     return await res.json();
+  }
+
+  async function fetchPeriod(token, fromIso, toIso) {
+    const res = await fetch(SB_URL + "/rest/v1/rpc/dashboard_period", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: SB_KEY },
+      body: JSON.stringify({ p_token: token, p_from: fromIso, p_to: toIso }),
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return await res.json();
+  }
+
+  // ─── Period selector ─────────────────────────────────────────────────────
+  // Локально (Київ) — щоб «сьогодні» був з місцевих 00:00, а не UTC.
+  const KYIV_TZ_OFFSET_MIN = 3 * 60; // зимовий час: +2, літній: +3
+  function startOfKyivDay(daysAgo = 0) {
+    const now = new Date();
+    // переводим в Kyiv-локал и обнуляем час/мин/сек
+    const local = new Date(now.getTime() + KYIV_TZ_OFFSET_MIN * 60 * 1000);
+    local.setUTCHours(0, 0, 0, 0);
+    local.setUTCDate(local.getUTCDate() - daysAgo);
+    // обратно в UTC
+    return new Date(local.getTime() - KYIV_TZ_OFFSET_MIN * 60 * 1000);
+  }
+  function presetRange(p) {
+    const now = new Date();
+    if (p === "today")      return [startOfKyivDay(0),  now];
+    if (p === "yesterday")  return [startOfKyivDay(1),  startOfKyivDay(0)];
+    if (p === "7d")         return [startOfKyivDay(6),  now];
+    if (p === "30d")        return [startOfKyivDay(29), now];
+    return [startOfKyivDay(6), now];
+  }
+  function fmtRangeLabel(from, to) {
+    const f = from.toISOString().slice(0, 10);
+    const t = new Date(to.getTime() - 1).toISOString().slice(0, 10);
+    return f === t ? f : f + " — " + t;
+  }
+  let currentPeriod = { preset: "7d", from: null, to: null };
+
+  async function loadPeriod() {
+    if (!currentToken) return;
+    let from = currentPeriod.from, to = currentPeriod.to;
+    if (currentPeriod.preset !== "custom") {
+      [from, to] = presetRange(currentPeriod.preset);
+    }
+    document.getElementById("periodLabel").textContent = fmtRangeLabel(from, to);
+    document.getElementById("periodFrom").value = from.toISOString().slice(0, 10);
+    document.getElementById("periodTo").value   = new Date(to.getTime() - 1).toISOString().slice(0, 10);
+
+    try {
+      const d = await fetchPeriod(currentToken, from.toISOString(), to.toISOString());
+      if (!d || !d.ok) return;
+      const e = d.events || {};
+      const ev = (k) => e[k] || 0;
+      document.getElementById("pkVisits").textContent = ev("site_visit");
+      document.getElementById("pkVisitsSub").textContent = "унікальних: " + (d.unique_visitors || 0);
+      document.getElementById("pkApkClicks").textContent = ev("site_apk_click");
+      document.getElementById("pkBotClicks").textContent = ev("site_bot_click");
+      document.getElementById("pkBotStart").textContent = ev("bot_start");
+      document.getElementById("pkBotStartSub").textContent = "унік: " + (d.unique_bot_users || 0);
+      document.getElementById("pkTrial").textContent = ev("trial_issued");
+      document.getElementById("pkTrialSub").textContent = "відмов: " + ev("trial_denied");
+      document.getElementById("pkPaid").textContent = ev("order_paid");
+      document.getElementById("pkPaidSub").textContent = "створено: " + ev("order_created");
+      document.getElementById("pkApkBot").textContent = ev("apk_download_bot");
+      document.getElementById("pkInstalls").textContent = d.new_installs || 0;
+      document.getElementById("pkActive").textContent = d.active_devices || 0;
+      document.getElementById("pkSupport").textContent = ev("support_message");
+    } catch (e) {
+      console.error("[period]", e);
+    }
+  }
+
+  function bindPeriodSelector() {
+    document.querySelectorAll(".period-bar .preset[data-preset]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".period-bar .preset").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentPeriod = { preset: btn.dataset.preset, from: null, to: null };
+        try { localStorage.setItem("rezerv_period_preset", currentPeriod.preset); } catch (e) {}
+        loadPeriod();
+      });
+    });
+    document.getElementById("applyCustom").addEventListener("click", () => {
+      const fStr = document.getElementById("periodFrom").value;
+      const tStr = document.getElementById("periodTo").value;
+      if (!fStr || !tStr) return;
+      const from = new Date(fStr + "T00:00:00+03:00");
+      const to   = new Date(tStr + "T23:59:59+03:00");
+      if (to <= from) return;
+      document.querySelectorAll(".period-bar .preset").forEach((b) => b.classList.remove("active"));
+      currentPeriod = { preset: "custom", from, to };
+      loadPeriod();
+    });
+    // восстановить из localStorage
+    try {
+      const saved = localStorage.getItem("rezerv_period_preset");
+      if (saved && ["today","yesterday","7d","30d"].includes(saved)) {
+        currentPeriod.preset = saved;
+        document.querySelectorAll(".period-bar .preset").forEach((b) =>
+          b.classList.toggle("active", b.dataset.preset === saved));
+      }
+    } catch (e) {}
   }
 
   // ─── Charts state ────────────────────────────────────────────────────────
@@ -587,6 +739,7 @@
       }
       document.getElementById("liveBadge").textContent = "ONLINE";
       renderEverything(data);
+      loadPeriod(); // период тоже обновляем при каждом тике
     } catch (e) {
       console.error(e);
       document.getElementById("liveBadge").textContent = "ERROR";
@@ -595,6 +748,7 @@
 
   function startRefresh() {
     stopRefresh();
+    bindPeriodSelector();
     refresh();
     refreshTimer = setInterval(refresh, 30000);
   }
